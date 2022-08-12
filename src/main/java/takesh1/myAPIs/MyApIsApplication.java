@@ -44,16 +44,15 @@ public class MyApIsApplication {
             Role r1 = new Role("ROLE_USER");
             Role r2 = new Role("ROLE_ADMIN");
             Role r3 = new Role("ROLE_SUPER_ADMIN");
-            Role r4 = new Role("ROLE_MANAGER");
 
             roleRepository.saveAll(
-                    List.of(r1, r2, r3, r4)
+                    List.of(r1, r2, r3)
             );
 
             systemUserService.addRoleToUser("trung", "ROLE_ADMIN");
             systemUserService.addRoleToUser("trung", "ROLE_USER");
             systemUserService.addRoleToUser("phuong", "ROLE_USER");
-            systemUserService.addRoleToUser("duc", "ROLE_MANAGER");
+            systemUserService.addRoleToUser("trung", "ROLE_SUPER_ADMIN");
             systemUserService.addRoleToUser("phong", "ROLE_ADMIN");
         };
     }

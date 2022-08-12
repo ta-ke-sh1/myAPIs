@@ -36,6 +36,9 @@ public class SystemUser {
         this.address = address;
         this.dob = dob;
     }
+    public UUID getUserId() {
+        return userId;
+    }
 
     public Collection<Role> getRoles(){
         return this.roles;

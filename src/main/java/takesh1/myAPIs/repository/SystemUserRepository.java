@@ -12,7 +12,5 @@ import java.util.UUID;
 public interface SystemUserRepository extends JpaRepository<SystemUser, UUID> {
     @Query("select c from SystemUser c WHERE c.userId = ?1")
     Optional<SystemUser> findBySystemUserId(UUID id);
-
-    SystemUser findByUsername (String username);
-
+    Optional<SystemUser> findByUsername (String username);
 }

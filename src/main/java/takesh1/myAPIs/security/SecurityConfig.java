@@ -44,8 +44,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers("/login/**", "/user/token/refresh").permitAll();
 
         // hasAnyAuthority -  restrict url access to a type of user
-        http.authorizeRequests().antMatchers(GET, "/user/**").hasAnyAuthority("ROLE_USER");
-        http.authorizeRequests().antMatchers(POST, "/user/add/**").hasAnyAuthority("ROLE_ADMIN");
+        http.authorizeRequests().antMatchers(GET, "/user/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN", "ROLE_SUPER_ADMIN");
+        http.authorizeRequests().antMatchers(POST, "/user/add/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPER_ADMIN");
 
         http.authorizeRequests().antMatchers("/role/**").hasAnyAuthority("ROLE_SUPER_ADMIN");
 

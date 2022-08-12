@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import takesh1.myAPIs.entity.SystemUser;
-import takesh1.myAPIs.service.RoleService;
 import takesh1.myAPIs.service.SecurityService;
 import takesh1.myAPIs.service.SystemUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +50,7 @@ public class SystemUserController {
     @PostMapping(path = "/add")
     public void registerUser(@RequestBody SystemUser user) {
         log.info(user.toString());
-        systemUserService.addSystemUser(user);
+        systemUserService.registerUser(user);
     }
 
     @GetMapping(path = "/delete/{userId}")
