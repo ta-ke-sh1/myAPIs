@@ -41,7 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         // Authorization filter
         // permitALl = allow access to everybody
-        http.authorizeRequests().antMatchers("/login/**", "/user/token/refresh").permitAll();
+        http.authorizeRequests().antMatchers("/login/**", "/user/token/refresh", "/user/register").permitAll();
 
         // hasAnyAuthority -  restrict url access to a type of user
         http.authorizeRequests().antMatchers(GET, "/user/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN", "ROLE_SUPER_ADMIN");

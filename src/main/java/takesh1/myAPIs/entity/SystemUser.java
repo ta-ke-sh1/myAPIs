@@ -23,17 +23,28 @@ public class SystemUser {
     private String lastName;
     private String phone;
     private String address;
+
+    private String email;
     private LocalDate dob;
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Role> roles = new ArrayList<>();
 
-    public SystemUser(String username, String password, String firstName, String lastName, String phone, String address, LocalDate dob) {
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public SystemUser(String username, String password, String firstName, String lastName, String phone, String address, String email, LocalDate dob) {
         this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
         this.address = address;
+        this.email = email;
         this.dob = dob;
     }
     public UUID getUserId() {
@@ -42,6 +53,10 @@ public class SystemUser {
 
     public Collection<Role> getRoles(){
         return this.roles;
+    }
+
+    public void setRoles(Collection<Role> roles){
+        this.roles = roles;
     }
 
     public String getUsername() {

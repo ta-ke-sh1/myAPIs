@@ -36,8 +36,8 @@ public class SystemUserService implements UserDetailsService {
         );
     }
 
-    public Role getRole(String rolename) {
-        return roleRepository.findByName(rolename).orElseThrow(
+    public Role getRole(String roleName) {
+        return roleRepository.findByName(roleName).orElseThrow(
                 () -> new IllegalStateException("Role does not exist!")
         );
     }
@@ -56,15 +56,25 @@ public class SystemUserService implements UserDetailsService {
         systemUser.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
         return new User(systemUser.getUsername(), systemUser.getPassword(), authorities);
     }
+
     public void registerUser(SystemUser c) {
-        SystemUser systemUser = getUser(c.getUsername());
-        if (systemUser != null) {
+        Optional<SystemUser> systemUser = systemUserRepository.findByUsername(c.getUsername());
+        if (systemUser.isPresent()) {
             log.error("User already exists!");
-            throw new UsernameNotFoundException("User does not exists!");
+            throw new UsernameNotFoundException("User already exists!");
         }
         c.setPassword(passwordEncoder.encode(c.getPassword()));
         Role role = getRole("ROLE_USER");
         c.getRoles().add(role);
+        systemUserRepository.save(c);
+    }
+
+    public void addUser(SystemUser c) {
+        Optional<SystemUser> systemUser = systemUserRepository.findByUsername(c.getUsername());
+        if (systemUser.isPresent()) {
+            log.error("User already exists!");
+            throw new UsernameNotFoundException("User does not exists!");
+        }
         systemUserRepository.save(c);
     }
 
@@ -76,19 +86,8 @@ public class SystemUserService implements UserDetailsService {
         systemUserRepository.deleteById(id);
     }
 
-    public void updateSystemUser(UUID id, String oldPassword, String newPassword, String firstName, String lastName, String phone, String address) {
+    public void updateSystemUser(UUID id, String firstName, String lastName, String phone, String address, String email, Collection<Role> roles) {
         SystemUser systemUser = getUser(id);
-        String encoded = passwordEncoder.encode(oldPassword);
-        if (!Objects.equals(encoded, systemUser.getPassword())) {
-            throw new IllegalStateException(
-                    "Old password does not match!"
-            );
-        }
-
-        if (newPassword != null && newPassword.length() > 0 && !Objects.equals(oldPassword, newPassword)) {
-            systemUser.setPassword(passwordEncoder.encode(newPassword));
-        }
-
         if (firstName != null && firstName.length() > 0 && !Objects.equals(systemUser.getFirstName(), firstName)) {
             systemUser.setFirstName(firstName);
         }
@@ -102,12 +101,15 @@ public class SystemUserService implements UserDetailsService {
         }
 
         if (phone != null && phone.length() < 15 && phone.length() > 9 && !Objects.equals(systemUser.getPhone(), phone)) {
-            Optional<SystemUser> systemUserOptional = systemUserRepository.findBySystemUserId(id);
-            if (systemUserOptional.isPresent()) {
-                throw new IllegalStateException("Phone number taken");
-            }
             systemUser.setPhone(phone);
         }
+
+        if (email != null && email.length()  > 0 && !Objects.equals(systemUser.getEmail(), email)) {
+            systemUser.setEmail(email);
+        }
+
+        overrideRoleFromUser(systemUser, roles);
+
     }
 
     public void addRoleToUser(String username, String roleName) {
@@ -117,4 +119,11 @@ public class SystemUserService implements UserDetailsService {
         log.info("Added role: {} to user: {}", roleName, username);
     }
 
+    public void overrideRoleFromUser( SystemUser systemUser, Collection<Role> roles) {
+        for (Role role : roles) {
+            getRole(role.getName());
+        }
+        systemUser.setRoles(roles);
+        log.info("Override user {} roles", systemUser.getUsername());
+    }
 }

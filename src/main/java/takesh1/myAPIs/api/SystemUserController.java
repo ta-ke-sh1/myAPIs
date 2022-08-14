@@ -5,8 +5,11 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import takesh1.myAPIs.entity.Role;
 import takesh1.myAPIs.entity.SystemUser;
 import takesh1.myAPIs.service.SecurityService;
 import takesh1.myAPIs.service.SystemUserService;
@@ -16,10 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
@@ -48,9 +48,23 @@ public class SystemUserController {
     }
 
     @PostMapping(path = "/add")
+    public void addUser(@RequestBody SystemUser user) {
+        log.info(user.toString());
+        systemUserService.addUser(user);
+    }
+
+    @PostMapping(path = "/register")
     public void registerUser(@RequestBody SystemUser user) {
         log.info(user.toString());
         systemUserService.registerUser(user);
+    }
+
+    @PostMapping(path = "/verify/mail")
+    public ResponseEntity<Map<String, String>> sendMail(@RequestBody Map<String, String> userId) {
+        log.info("Verifying, {}", userId.get("userId"));
+        UUID id = UUID.fromString(userId.get("userId"));
+        SystemUser user = systemUserService.getUser(id);
+        return securityService.verifyByMail(user);
     }
 
     @GetMapping(path = "/delete/{userId}")
@@ -58,23 +72,16 @@ public class SystemUserController {
         systemUserService.deleteUser(userId);
     }
 
-    @PutMapping(path = "/update/{userId}")
-    public void updateInfo(@PathVariable("userId") UUID userId,
-                           @RequestParam(required = false) String oldPassword,
-                           @RequestParam(required = false) String newPassword,
-                           @RequestParam(required = false) String firstName,
-                           @RequestParam(required = false) String lastName,
-                           @RequestParam(required = false) String phone,
-                           @RequestParam(required = false) String address) {
-        systemUserService.updateSystemUser(userId, oldPassword, newPassword, firstName, lastName, phone, address);
+    @PostMapping(path = "/update/")
+    public void updateInfo(@RequestBody(required = false) UpdateUserForm form) {
+        systemUserService.updateSystemUser(form.getUserId(), form.getFirstName(), form.getLastName(), form.getPhone(), form.getAddress(), form.getEmail(), form.getRoles());
     }
 
     @PostMapping(path = "/authorize")
-    public void addRoleToUser(@RequestParam String username, @RequestParam String roleName){
+    public void addRoleToUser(@RequestParam String username, @RequestParam String roleName) {
         log.info("User: {}, Role: {}", username, roleName);
         systemUserService.addRoleToUser(username, roleName);
     }
-
 
     @GetMapping("/token/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -112,5 +119,17 @@ public class SystemUserController {
             throw new RuntimeException("Refresh token is missing");
         }
     }
+}
+
+@Data
+class UpdateUserForm {
+    private UUID userId;
+    private String firstName;
+    private String lastName;
+    private String phone;
+    private String address;
+    private String roleName;
+    private String email;
+    private Collection<Role> roles;
 }
 

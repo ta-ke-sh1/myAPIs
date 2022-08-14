@@ -32,10 +32,10 @@ public class MyApIsApplication {
     CommandLineRunner commandLineRunner(SystemUserRepository systemUserRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, SystemUserService systemUserService) {
         return args -> {
             String password = passwordEncoder.encode("12345");
-            SystemUser c1 = new SystemUser("trung", password, "Trung", "Ha The", "0818161998", "Linh Dam, Hoang Mai, Ha Noi", LocalDate.of(1998, 6, 1));
-            SystemUser c2 = new SystemUser("phuong", password, "Phuong", "Hoang Ha", "0984673837", "Van Cao, Hai Phong", LocalDate.of(1999, 10, 25));
-            SystemUser c3 = new SystemUser("duc", password, "Duc", "Trinh Minh", "0942373456", "Tran Van Binh, Ha Noi", LocalDate.of(2001, 8, 17));
-            SystemUser c4 = new SystemUser("phong", password, "Phong", "Pham Thanh", "0912731234", "Giai Phong, Hai Ba Trung, Ha Noi", LocalDate.of(2002, 12, 4));
+            SystemUser c1 = new SystemUser("trung", password, "Trung", "Ha The", "0818161998", "Linh Dam, Hoang Mai, Ha Noi", "trunght.jpc@gmail.com", LocalDate.of(1998, 6, 1));
+            SystemUser c2 = new SystemUser("phuong", password, "Phuong", "Hoang Ha", "0984673837", "Van Cao, Hai Phong", "trunghtgch200443@fpt.edu.vn", LocalDate.of(1999, 10, 25));
+            SystemUser c3 = new SystemUser("duc", password, "Duc", "Trinh Minh", "0942373456", "Tran Van Binh, Ha Noi", "trunght.yrc1@gmail.com", LocalDate.of(2001, 8, 17));
+            SystemUser c4 = new SystemUser("phong", password, "Phong", "Pham Thanh", "0912731234", "Giai Phong, Hai Ba Trung, Ha Noi","trunght.jpc1@gmail.com", LocalDate.of(2002, 12, 4));
 
             systemUserRepository.saveAll(
                     List.of(c1, c2, c3, c4)
