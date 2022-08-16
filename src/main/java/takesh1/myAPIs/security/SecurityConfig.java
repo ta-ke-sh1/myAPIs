@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -20,6 +21,7 @@ import static org.springframework.http.HttpMethod.POST;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserDetailsService userDetailsService;
@@ -31,23 +33,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception  {
+    protected void configure(HttpSecurity http) throws Exception {
         AuthenticateFilter authenticateFilter = new AuthenticateFilter(authenticationManagerBean());
         // override default login url
         authenticateFilter.setFilterProcessesUrl("/login");
 
         http.csrf().disable(); // prevent cross site restriction policy attacks
+
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         // Authorization filter
         // permitALl = allow access to everybody
-        http.authorizeRequests().antMatchers("/login/**", "/user/token/refresh", "/user/register").permitAll();
+        http.authorizeRequests().antMatchers("/login/**", "/user/token/refresh", "/user/register", "/user/**").permitAll();
 
         // hasAnyAuthority -  restrict url access to a type of user
         http.authorizeRequests().antMatchers(GET, "/user/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN", "ROLE_SUPER_ADMIN");
         http.authorizeRequests().antMatchers(POST, "/user/add/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_SUPER_ADMIN");
 
-        http.authorizeRequests().antMatchers("/role/**").hasAnyAuthority("ROLE_SUPER_ADMIN");
+        http.authorizeRequests().antMatchers("/role/add", "/role/delete", "/role/update").hasAnyAuthority("ROLE_SUPER_ADMIN");
 
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(authenticateFilter);

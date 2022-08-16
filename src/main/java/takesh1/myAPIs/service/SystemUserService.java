@@ -15,6 +15,7 @@ import takesh1.myAPIs.repository.SystemUserRepository;
 import takesh1.myAPIs.repository.RoleRepository;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -69,13 +70,23 @@ public class SystemUserService implements UserDetailsService {
         systemUserRepository.save(c);
     }
 
-    public void addUser(SystemUser c) {
-        Optional<SystemUser> systemUser = systemUserRepository.findByUsername(c.getUsername());
+    public void addUser(String username, String password, String firstName, String lastName, String phone, String address, String email, LocalDate dob, String role) {
+        Optional<SystemUser> systemUser = systemUserRepository.findByUsername(username);
         if (systemUser.isPresent()) {
             log.error("User already exists!");
-            throw new UsernameNotFoundException("User does not exists!");
+            throw new UsernameNotFoundException("User already exists!");
         }
+
+        SystemUser c = new SystemUser(username, password, firstName, lastName, phone, address, email, dob);
+
+        Optional<Role> roleCheck = roleRepository.findByName(role);
+        if (roleCheck.isEmpty()) {
+            throw new UsernameNotFoundException("Role does not exists!");
+        }
+
         systemUserRepository.save(c);
+        addRoleToUser(username, role);
+
     }
 
     public void deleteUser(UUID id) {
@@ -86,8 +97,10 @@ public class SystemUserService implements UserDetailsService {
         systemUserRepository.deleteById(id);
     }
 
-    public void updateSystemUser(UUID id, String firstName, String lastName, String phone, String address, String email, Collection<Role> roles) {
-        SystemUser systemUser = getUser(id);
+    public void updateSystemUser(String id, String firstName, String lastName, String phone, String address, String email, LocalDate dob, String role) {
+        log.info("{}, {}, {}, {}, {}, {}, {}, {}", id, firstName, lastName, phone, address, email, dob, role);
+        SystemUser systemUser = getUser(UUID.fromString(id));
+
         if (firstName != null && firstName.length() > 0 && !Objects.equals(systemUser.getFirstName(), firstName)) {
             systemUser.setFirstName(firstName);
         }
@@ -108,7 +121,18 @@ public class SystemUserService implements UserDetailsService {
             systemUser.setEmail(email);
         }
 
-        overrideRoleFromUser(systemUser, roles);
+        if (!Objects.equals(systemUser.getDob(), dob)) {
+            systemUser.setDob(dob);
+        }
+
+        Collection<Role> userRoles = systemUser.getRoles();
+        String[] roleNames = role.split(";");
+        for(String roleName: roleNames){
+            Role r = getRole(roleName);
+            if(!userRoles.contains(r)){
+                addRoleToUser(systemUser.getUsername(), roleName);
+            }
+        }
 
     }
 

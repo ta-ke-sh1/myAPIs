@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -37,28 +39,39 @@ public class SystemUserController {
         this.securityService = securityService;
     }
 
+    @CrossOrigin
     @GetMapping
     public List<SystemUser> getUsers() {
         return systemUserService.getUsers();
     }
 
+    @CrossOrigin
     @GetMapping(path = "/{userId}")
     public SystemUser getUser(@PathVariable("userId") UUID userId) {
         return systemUserService.getUser(userId);
     }
 
+    @CrossOrigin
     @PostMapping(path = "/add")
-    public void addUser(@RequestBody SystemUser user) {
-        log.info(user.toString());
-        systemUserService.addUser(user);
+    public void addUser(@RequestBody(required = false) UserForm form) {
+        systemUserService.addUser(
+                form.getUsername(),
+                form.getPassword(),
+                form.getFirstName(),
+                form.getLastName(),
+                form.getPhone(),
+                form.getAddress(),
+                form.getEmail(),
+                form.getDob(),
+                form.getRole());
     }
-
     @PostMapping(path = "/register")
     public void registerUser(@RequestBody SystemUser user) {
-        log.info(user.toString());
+        log.info("User: {}", user.toString());
         systemUserService.registerUser(user);
     }
 
+    @CrossOrigin
     @PostMapping(path = "/verify/mail")
     public ResponseEntity<Map<String, String>> sendMail(@RequestBody Map<String, String> userId) {
         log.info("Verifying, {}", userId.get("userId"));
@@ -67,22 +80,34 @@ public class SystemUserController {
         return securityService.verifyByMail(user);
     }
 
+    @CrossOrigin
     @GetMapping(path = "/delete/{userId}")
     public void deleteUser(@PathVariable("userId") UUID userId) {
         systemUserService.deleteUser(userId);
     }
 
+    @CrossOrigin
     @PostMapping(path = "/update/")
-    public void updateInfo(@RequestBody(required = false) UpdateUserForm form) {
-        systemUserService.updateSystemUser(form.getUserId(), form.getFirstName(), form.getLastName(), form.getPhone(), form.getAddress(), form.getEmail(), form.getRoles());
+    public void updateInfo(@RequestBody(required = false) UserForm form) {
+        systemUserService.updateSystemUser(
+                form.getUserId(),
+                form.getFirstName(),
+                form.getLastName(),
+                form.getPhone(),
+                form.getAddress(),
+                form.getEmail(),
+                form.getDob(),
+                form.getRole());
     }
 
+    @CrossOrigin
     @PostMapping(path = "/authorize")
     public void addRoleToUser(@RequestParam String username, @RequestParam String roleName) {
         log.info("User: {}, Role: {}", username, roleName);
         systemUserService.addRoleToUser(username, roleName);
     }
 
+    @CrossOrigin
     @GetMapping("/token/refresh")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String authHeader = request.getHeader(AUTHORIZATION);
@@ -122,14 +147,18 @@ public class SystemUserController {
 }
 
 @Data
-class UpdateUserForm {
-    private UUID userId;
+class UserForm {
+    private String username;
+    private String password;
+    private String userId;
     private String firstName;
     private String lastName;
     private String phone;
     private String address;
     private String roleName;
     private String email;
-    private Collection<Role> roles;
+    private LocalDate dob;
+    private String role;
+
 }
 

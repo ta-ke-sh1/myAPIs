@@ -23,7 +23,6 @@ public class SystemUser {
     private String lastName;
     private String phone;
     private String address;
-
     private String email;
     private LocalDate dob;
     @ManyToMany(fetch = FetchType.EAGER)

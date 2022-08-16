@@ -49,8 +49,7 @@ public class MyApIsApplication {
                     List.of(r1, r2, r3)
             );
 
-            systemUserService.addRoleToUser("trung", "ROLE_ADMIN");
-            systemUserService.addRoleToUser("trung", "ROLE_USER");
+            systemUserService.addRoleToUser("duc", "ROLE_ADMIN");
             systemUserService.addRoleToUser("phuong", "ROLE_USER");
             systemUserService.addRoleToUser("trung", "ROLE_SUPER_ADMIN");
             systemUserService.addRoleToUser("phong", "ROLE_ADMIN");
